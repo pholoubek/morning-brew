@@ -1,7 +1,3 @@
-<h1>
-	Morning Brew 
-</h1>
+# Morning Coding Brew
 
-<p>
-	Compilation of random solutions from my morning routine.
-</p>
+_Various solutions from Hackerrank, LeetCode & others_
