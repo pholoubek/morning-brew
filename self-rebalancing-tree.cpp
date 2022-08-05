@@ -1,96 +1,120 @@
-int ht(node *root)
+/* Node is defined as :
+typedef struct node
 {
-	if (root)
+	int val;
+	struct node* left;
+	struct node* right;
+	int ht;
+} node; */
+
+int ht(node *n)
+{
+	if (n)
 	{
-		return 1 + max(ht(root->left), ht(root->right));
+		return 1 + max(ht(n->left), ht(n->right));
 	}
+
 	return -1;
 }
 
-void updateHt(node *root)
+void updateHt(node *n)
 {
-	if (root)
+	if (n)
 	{
-		root->ht = 1 + max(ht(root->left), ht(root->right));
+		n->ht = 1 + max(ht(n->left), ht(n->right));
 	}
 }
 
-node *rotateL(node *root)
+node *rotateL(node *n)
 {
-	node *temp = root->right;
-	node *t = temp->left;
+	node *x = n->right;
+	node *T2 = x->left;
 
-	root->right = t;
-	temp->left = root;
+	x->left = n;
+	n->right = T2;
 
-	updateHt(temp);
-	updateHt(root);
+	updateHt(x);
+	updateHt(n);
 
-	return temp;
+	return x;
 }
 
-node *rotateR(node *root)
+node *rotateR(node *n)
 {
-	node *temp = root->left;
+	node *x = n->left;
+	node *T2 = x->right;
 
-	root->left = temp->right;
-	temp->right = root;
+	x->right = n;
+	n->left = T2;
 
-	updateHt(temp);
-	updateHt(root);
+	updateHt(x);
+	updateHt(n);
 
-	return temp;
+	return x;
+}
+
+node *insertNewNode(int val)
+{
+	node *newNode = new node;
+	newNode->val = val;
+	newNode->ht = 0;
+	newNode->right = NULL;
+	newNode->left = NULL;
+	return newNode;
 }
 
 node *insert(node *root, int val)
 {
-	// print(root);
-	// cout << endl << endl;
-	if (!root)
+	if (root == NULL)
 	{
-		root = new node;
-		root->val = val;
-		root->ht = 0;
-		root->left = root->right = nullptr;
-		return root;
+		return insertNewNode(val);
 	}
-	if (root->val < val)
-	{
-		root->right = insert(root->right, val);
-	}
-	else if (root->val > val)
+
+	// left subtree
+	if (val < root->val)
 	{
 		root->left = insert(root->left, val);
+		// right subtree
 	}
-
-	updateHt(root);
-
-	int bal = ht(root->left) - ht(root->right);
-
-	// RR
-	if (bal <= -2 and val > root->right->val)
+	else if (val > root->val)
 	{
-		root = rotateL(root);
+		root->right = insert(root->right, val);
+		// AVL tree only allows unique values
+	}
+	else
+	{
+		return root;
 	}
 
-	// LL
-	if (bal >= 2 and val < root->left->val)
+	// update height after each insertion
+	updateHt(root);
+	int balance = ht(root->left) - ht(root->right);
+
+	// int balance = getBF(root);
+
+	// LL case
+	if (balance > 1 && val < root->left->val)
 	{
 		root = rotateR(root);
 	}
 
-	// RL
-	if (bal <= -2 and val < root->right->val)
-	{
-		root->right = rotateR(root->right);
-		root = rotateL(root);
-	}
-
-	// LR
-	if (bal >= 2 and val > root->left->val)
+	// LR case
+	if (balance > 1 && val > root->left->val)
 	{
 		root->left = rotateL(root->left);
 		root = rotateR(root);
+	}
+
+	// RR case
+	if (balance < -1 && val > root->right->val)
+	{
+		root = rotateL(root);
+	}
+
+	if (balance < -1 && val < root->right->val)
+	{
+		root->right = rotateR(root->right);
+		root = rotateL(root);
 	}
 
 	return root;
